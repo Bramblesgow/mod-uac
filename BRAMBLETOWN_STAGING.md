@@ -46,3 +46,14 @@ Generated record: server operator integration assessment and live checks.
 - **Scope:** Review the existing stock trainers at each hub and add only genuinely missing class trainers required by mod-uac combinations. Select faction-appropriate NPC trainer entries, ground-safe placement near existing trainer clusters, and appropriate gossip/training coverage. Avoid duplicates and changes to conventional race/class progression.
 - **Validation:** Confirm each trainer's correct class spell offerings, spawn/location, level-range training, faction availability, guards/directions where applicable, and cross-client behavior (patched and unpatched). Validate against Brambletown Playerbots and Dungeon Clear.
 - **Constraint:** Do not implement any trainer additions, introduce new trainer-introduction quests, change client patches, or restart the live server unless explicitly requested. Missing introductory trainer quests are intentionally acceptable.
+
+## Hunter pet spells — approved GitHub activation candidate (2026-10-19)
+
+The optional Hunter pet SQL files have been moved from `data/sql/db-paused/` into `data/sql/db-world/` in the activation pull request. This is a **repository change only**. The 2026-10-16 production deployment record above remains historical; do not interpret merging this PR as a live database migration, a build, or a server restart.
+
+- Scope: **all Hunters** receive Tame Beast (1515), Call Pet (883), Dismiss Pet (2641), Feed Pet (6991), and Revive Pet (982) at character creation/next login. This intentionally bypasses the level-10 pet quest gate for standard and newly supported races.
+- Dependencies: `PlayerStart.CustomSpells = 1` (already configured in production); install **both** paired SQL migrations in the same release. The `spell_dbc` overlay lowers server-side spell BaseLevel/SpellLevel to 1.
+- Deployment: update the deployed module checkout to the reviewed merged commit, back up the affected world DB tables, restart the worldserver during an approved maintenance window, and verify both migrations were applied. Until that restart, the live server remains unchanged.
+- Regression checks: new level-1 Human Hunter and original-race Hunter learn all five spells and can tame/use a pet; existing Human Hunter gets missing spells on next login; pet behavior, ordinary Hunter talents/spells, and a conventional level-10 Hunter quest chain remain functional. Validate client UI/casting in game.
+- Rollback: run both paired `data/sql/db-uninstall/mod_uac_hunter_pet_*` scripts against the world DB after taking a backup; rolling back only the files will not undo an applied migration. Existing characters that learned spells are **not automatically unlearned** by reverting DB rows. Avoid global spell removals without separate approval.
+- No gameplay executable or client patch is changed in this PR. No live deployment, restart, or database changes are authorized by a GitHub merge.
